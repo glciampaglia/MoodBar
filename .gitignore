@@ -1,3 +1,4 @@
 data/*
 !data/README.rst
 .*.swp
+data
