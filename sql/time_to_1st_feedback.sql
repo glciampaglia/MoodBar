@@ -23,9 +23,10 @@ select
 from 
     edit_page_tracking left join moodbar_feedback
 on ept_user = mbf_user_id 
-/* TODO remove if edit_page_tracking was deployed at the same time of MB */
--- where 
---    user_id >= 15013111 
+where 
+    /* the first record on moodbar_feedback is a test so it is fine to assume
+     * its timestamp as the time of the deployment of MoodBar */
+    ept_timestamp > '20110725231036'
 group by ept_user
 /* select a random sample */
 order by rand()  
