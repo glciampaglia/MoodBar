@@ -2,7 +2,7 @@
 select 
     /* the user id */
     ept_user as user_id,
-    /* if -1, censored observation; sad = 0, confused = 1, happy = 2 */
+    /* sad = 0, confused = 1, happy = 2; if -1, censored observation */
     if(
         mbf_type is NULL, 
         -1, 
@@ -11,7 +11,9 @@ select
             when 'confused' then 1 
             when 'happy' then 2 
         end
-    ) as obs_code, 
+    ) as mood_code, 
+    /* self-explanatory ... */
+    if(mbf_type is NULL, 0, 1) as is_uncensored,
     /* time of first click on 'edit', in days since EPOCH */
     unix_timestamp(ept_timestamp) / 86400.0 as first_edit_click, 
     /* end of observation window for censored observations, else time of first
