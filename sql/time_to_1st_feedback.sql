@@ -74,4 +74,4 @@ HAVING is_uncensored = 1
 /* select a random sample */
 -- ORDER BY RAND()  
 /* sample size */
-lIMIT 10
+-- lIMIT 10000
