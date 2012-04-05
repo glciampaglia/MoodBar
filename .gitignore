@@ -3,3 +3,5 @@ data/*
 .*.swp
 data
 .Rproj.user
+.RData
+.Rhistory
