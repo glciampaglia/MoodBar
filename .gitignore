@@ -2,3 +2,4 @@ data/*
 !data/README.rst
 .*.swp
 data
+.Rproj.user
