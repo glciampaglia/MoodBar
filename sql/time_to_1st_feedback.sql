@@ -27,7 +27,7 @@ SELECT
     /* self-explanatory ... */
     IF(mbf_type IS NULL, 0, 1) AS is_uncensored,
     /* time of first click on 'edit', in days since EPOCH */
-    UNIX_TIMESTAMP(ept_timestamp) / 86400.0 AS first_edit_click, 
+    ROUND(UNIX_TIMESTAMP(ept_timestamp) / 86400.0, 4) AS first_edit_click, 
     /* end of observation window for censored observations, else time of first
      * mood feedback, in days since EPOCH */
     UNIX_TIMESTAMP(IFNULL(
@@ -74,4 +74,4 @@ HAVING is_uncensored = 1
 /* select a random sample */
 -- ORDER BY RAND()  
 /* sample size */
--- lIMIT 10000
+lIMIT 10
