@@ -5,3 +5,7 @@ data
 .Rproj.user
 .RData
 .Rhistory
+*.aux
+*.log
+*.pdf
+*.tex
