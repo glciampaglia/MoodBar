@@ -12,6 +12,7 @@ nn = 1024
 
 # parameters for boot
 R = 10000
+ncpus = 2 # set to whatever is for your system
 
 hazard = function(data, ...) {
   surv = survfit(Surv(ttfeedback, is_uncensored) ~ 1, data = data)
@@ -27,11 +28,12 @@ test = function(data, indices, ...) {
 }
 
 haz = hazard(moodbar, from = tfrom, to = tto, n = nn)
-b = boot(moodbar, test, R = 100, parallel = "multicore", ncpus = 2, from = tfrom, 
+b = boot(moodbar, test, R = 100, parallel = "multicore", ncpus = ncpus, from = tfrom, 
          to = tto, n = nn)
 
 haz$se.boot = apply(b$t, 2, sd)
 ucl = haz$y + 1.96 * haz$se.boot
 lcl = haz$y - 1.96 * haz$se.boot
-p = qplot(haz$x, haz$y, xlab = "days since first edit click", ylab = "hazard rate") + 
-  geom_smooth(aes(ymin = lcl, ymax = ucl), stat = "identity")
+p = qplot(haz$x, haz$y, xlab = "days since first edit click", ylab = "hazard rate", geom = "line") + 
+  geom_smooth(aes(ymin = lcl, ymax = ucl), stat = "identity") + scale_x_continuous(limits = c(0,20))
+p
