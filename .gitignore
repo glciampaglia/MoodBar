@@ -9,3 +9,5 @@ data
 *.log
 *.pdf
 *.tex
+plots
+reports
