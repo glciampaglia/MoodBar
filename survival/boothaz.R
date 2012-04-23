@@ -4,8 +4,8 @@ library(boot)
 library(ggplot2)
 
 # MoodBar milestones (assuming deployment on midnight)
-# ticon = as.POSIXct('2011-11-01', tz="GMT") # added icon
-# tmessage = as.POSIXct('2011-11-17', tz="GMT") # message mandatory
+ticon = as.POSIXct('2011-11-01', tz="GMT") # added icon
+tmessage = as.POSIXct('2011-11-17', tz="GMT") # message mandatory
 ttooltip = as.POSIXct('2011-12-14', tz="GMT") # added tooltip
 
 moodbar = read.table("data/time_to_1st_feedback.tsv", sep="\t", header=T)
@@ -19,11 +19,11 @@ moodbar$ffon = as.POSIXlt(moodbar$first_feedback_or_now * 86400, tz="GMT",
 #   moodbar$ffon < t2,]
 # moodbar3 = moodbar[moodbar$fec >= t2 & moodbar$fec < t3 & moodbar$ffon >= t2 & 
 #   moodbar$ffon < t3,]
-moodbar1 = moodbar[moodbar$fec < ttooltip,]
+moodbar1 = moodbar[moodbar$fec < ticon,]
 moodbar2 = moodbar[moodbar$fec >= ttooltip,]
 
 # parameters for boot
-R = 10000
+R = 1000
 ncpus = multicore:::detectCores() # or whathever you want 
 
 hazard.density = function(data) {
@@ -54,6 +54,6 @@ hazard.plot = function(data, R, ncpus, ...) {
 p1 = hazard.plot(moodbar1, R, ncpus, main = 'Hazard rate (without tooltip)') + 
   scale_x_continuous(limits = c(0,50)) + scale_y_continuous(limits = c(0,0.025))
 p2 = hazard.plot(moodbar2, R, ncpus, main = 'Hazard rate (with tooltip)') + 
-  scale_x_continuous(limits = c(0,50)) + scale_y_continuous(limits = c(0,0.025))
+  scale_x_continuous(limits = c(0,50)) + scale_y_continuous(limits = c(0,0.03))
 p1
 p2
