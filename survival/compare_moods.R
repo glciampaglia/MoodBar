@@ -12,7 +12,7 @@ print(km.fit)
 # plot the survival curves
 plot(km.fit, conf.int=T, xlab="time since first edit click (days)",
      ylab="proportion with at least one feedbacks", lab=c(10,10,7), 
-     main="K-M Survivor Function",  lty=1:3, col=1:3, xmax=20)
+     main="K-M Survivor Function",  lty=1:3, col=1:3, log='x')
 legend(14, 0.65, c("sad", "confused", "happy"), lty=1:3, col=1:3)
 mtext("Comparison by mood type",3, -2)
 abline(h=0)
