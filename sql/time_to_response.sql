@@ -1,5 +1,5 @@
 SELECT 
-    /* censoring status */
+    /* censoring status, 0 = censored, 1 = observation */
     IF(mbfr_id IS NULL, 0, 1) AS status,
     /* feedback mood */
     mbf_type AS mood, 
@@ -18,8 +18,9 @@ SELECT
     mbfr_user_editcount AS resp_edits, 
     /* time the feedback was posted, UTC */
     CAST(mbf_timestamp AS DATETIME) AS mood_time,
-    /* time the feedback was responded to, UTC */
-    CAST(mbfr_timestamp AS DATETIME) AS response_time 
+    /* time the feedback was responded to or, for censored observations, time
+     * the query was executed, in UTC */
+    CAST(IFNULL(mbfr_timestamp, NOW()) AS DATETIME) AS response_time 
 FROM 
     moodbar_feedback a 
 LEFT JOIN 
