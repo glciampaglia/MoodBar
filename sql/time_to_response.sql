@@ -31,4 +31,7 @@ WHERE
     /* select only mood feedbacks that were sent after the feedback dashboard
      * was deployed */
     -- TODO: check if this is really needed.
-    DATE(mbf_timestamp) >= '2011-12-14';
+    DATE(mbf_timestamp) >= '2011-12-14' 
+    /* do not select hidden messages (state = 255), for the obvious reason that
+     * they can't be responded to */
+    AND mbf_hidden_state = 0;
