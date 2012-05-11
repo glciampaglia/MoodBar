@@ -1,3 +1,6 @@
+-- estimates the proportion of users using MoodBar for the first time. This can
+-- be used as a crude upper to the effect size of editor retention rates (when
+-- proportions are compared)
 SELECT 
     SUM(b.num_first_feedback)/SUM(c.num_edit_click) * 100 AS perc_first_mooders 
 FROM (
