@@ -6,7 +6,7 @@ SET @days_offset=2; /* offset in days since registration */
 SELECT 
     DATE_FORMAT(editdate, "%Y-%m") as cohort,
     AVG(editcount) as EC,
-    SAMPLE_STDDEV(editcount) as sdEC,
+    STDDEV_SAMP(editcount) as sdEC,
     COUNT(editcount) / SQRT(SAMPLE_STDDEV(editcount)) as seEC
 FROM (
     SELECT 
