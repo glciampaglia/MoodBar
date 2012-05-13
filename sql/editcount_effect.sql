@@ -7,7 +7,7 @@ SELECT
     DATE_FORMAT(editdate, "%Y-%m") as cohort,
     AVG(editcount) as EC,
     STDDEV_SAMP(editcount) as sdEC,
-    COUNT(editcount) / SQRT(SAMPLE_STDDEV(editcount)) as seEC
+    SQRT(STDDEV_SAMP(editcount)) / COUNT(editcount) as seEC
 FROM (
     SELECT 
         DATE(rev_timestamp) AS editdate, 
