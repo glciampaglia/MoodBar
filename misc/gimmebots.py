@@ -87,32 +87,49 @@ def normalize_user_names(names):
                 norm_names.append(b)
     return norm_names
 
-def active_bots():
-    # from: Wikipedia:Bots/Status
-    q = "/w/api.php?action=query&prop=revisions&format=json&rvprop=content&rvlimit=1&rvdir=newer&titles=Wikipedia%3ABots%2FStatus%2Factive_bots"
-    pat = r"^\{\{\w+\|(?P<user_name>.+?)\|"
-    x = re.compile(pat, re.MULTILINE)
-    with closing(urlopen(h + q)) as r:
-        j = json.load(r, encoding='utf-8')
-    rev_id = j["query"]["pages"].keys()[0]
-    rev_text = j["query"]["pages"][rev_id]['revisions'][0]['*']
-    return x.findall(rev_text) #, rev_text
+_H = 'https://en.wikipedia.org'
+_Q = "/w/api.php?action=query&prop=revisions&format=json&rvprop=content&rvlimit=1&titles={}"
 
-def bots_by_number():
-    # from: Wikipedia:List of bots by number of edits
-    q = "/w/api.php?action=query&prop=revisions&format=xml&rvprop=content&rvlimit=1&rvdir=newer&rvexpandtemplates=&export=&exportnowrap=&titles=Wikipedia%3AList%20of%20bots%20by%20number%20of%20edits%2F1%E2%80%931000"
-    pat = r"""^\|\ 
-        (?P<user_name>[a-zA-Z].+)
-        |
-        \[\[User:\w+\|(?P<user_name_link>.+?)\]\]"""
-    x = re.compile(pat, re.MULTILINE | re.VERBOSE)
-    table_lines = []
-    with closing(urlopen(h + q)) as r:
-        text = '\n'.join(r.readlines())
-    bots = list(filter(None, reduce(tuple.__add__, x.findall(text))))
-    bots = map(utf_8_decode, bots)
-    bots = zip(*bots)[0]
-    return list(bots)
+def get_latest_revision(title):
+    ''' queries the API for the text of latest revision of given title '''
+    url = _H + _Q.format(title.replace(' ', '_'))
+    with closing(urlopen(url)) as resp:
+        j = json.load(resp, encoding='utf-8')
+    k = j['query']['pages'].iterkeys().next()
+    return j['query']['pages'][k]['revisions'][0]['*']
+
+_pat_BotS = r"""
+^
+\{\{
+BotS
+\|
+(?P<user_name>.+?)
+\|
+"""
+
+_re_BotS = re.compile(_pat_BotS, re.MULTILINE | re.VERBOSE | re.UNICODE)
+
+def scrape_BotS_template(title):
+    ''' scrape user names of bots from a list of BotS templates '''
+    rev_text = get_latest_revision(title)
+    return _re_BotS.findall(rev_text) 
+
+def scrape_table(title):
+    ''' scrape user names from rows for a table '''
+    rev_text = get_latest_revision(title)
+    table_rows = map(lambda k : k.replace('\n', ''), rev_text.split('|-'))
+    matches = []
+    for row in table_rows:
+        fields = row.split('|')
+        n = len(fields)
+        if n == 5:
+            name = fields[3].strip(']')
+        elif n == 4:
+            name = fields[2]
+        else:
+            continue
+        matches.append(name.strip())
+    return matches
 
 def create_table(conn, bots):
     bots = zip(*map(utf_8_decode, bots))[0]
@@ -170,11 +187,12 @@ def create_table(conn, bots):
 if __name__ == '__main__':
 
     # retrieve bot lists
-    b1 = active_bots()
-    b2 = bots_by_number()
+    b1 = scrape_BotS_template('Wikipedia:Bots/Status/active_bots')
+    b2 = scrape_BotS_template('Wikipedia:Bots/Status/inactive_bots')
+    b3 = scrape_table('Wikipedia:List_of_bots_by_number_of_edits/1–1000')
 
-    # normalize user names
-    bots = normalize_user_names(set(b1 + b2))
+    # normalize user names and remove dups
+    bots = set(normalize_user_names(set(b1 + b2 + b3)))
     print '{} names (incl. redirects) found from bots list'.format(len(bots))
 
     # the database session corresponds to the scope of this with statement
