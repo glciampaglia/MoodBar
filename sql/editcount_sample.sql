@@ -12,14 +12,16 @@ CREATE TEMPORARY TABLE IF NOT EXISTS
         mark_as_helpful;
 
 SELECT 
-    /* edit counts are transformed into rates so they share the same offset in
-     * the regression
-     */
-    ec.ec1 as Rd0_1,
-    ec.ec2 - ec.ec1 as Rd1_2,
-    ec.ec5 - ec.ec2 / 3 as Rd2_5,
-    ec.ec10 - ec.ec5 / 5 as Rd5_10,
-    ec.ec30 - ec.ec10 / 20 as Rd10_30,
+    /* editcount on first day */
+    ec.ec1 as Cd0_1,
+    /* editcount on second day */
+    ec.ec2 - ec.ec1 as Cd1_2,
+    /* editcount on day 2 to day 5 */
+    ec.ec5 - ec.ec2 as Cd2_5,
+    /* editcount on day 5 to day 10 */
+    ec.ec10 - ec.ec5 as Cd5_10,
+    /* editcount on day 10 to day 30 */
+    ec.ec30 - ec.ec10 as Cd10_30,
     /* 0 = reference, 1 = sent feedback, 2 = sent feedback & received response,
      * 3 = sent feedback & received response & marked response as helpful
      */
