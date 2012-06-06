@@ -57,7 +57,9 @@ SELECT
     /* OS type, factor */
     mbf_system_type AS os,
     /* Browser type, factor */
-    SUBSTRING_INDEX(mbf_user_agent, '/', 1) as browser
+    SUBSTRING_INDEX(mbf_user_agent, '/', 1) as browser,
+    /* Total number of feedback messages sent */
+    COUNT(DISTINCT mbf_timestamp) AS num_feedbacks
 FROM 
     edit_page_tracking 
 JOIN
