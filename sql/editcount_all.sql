@@ -39,6 +39,7 @@ SELECT
         EXTRACT(YEAR_MONTH FROM ept_timestamp),
         @min_month
     ) as cohort,
+    /* Time, in seconds, from account registration until first edit click */
     (UNIX_TIMESTAMP(ept_timestamp) 
         - UNIX_TIMESTAMP(user_registration)) AS ept_lag
 FROM 
