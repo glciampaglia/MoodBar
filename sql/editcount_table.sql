@@ -24,7 +24,7 @@ WHERE
     AND DATE(u.user_registration) >= @min_registration
 GROUP BY
     u.user_id";
-
+/*
 -- create temp table giovanni.ec1
 SET @days_offset=1; 
 SET @stmt=CONCAT(@_create, "giovanni.ec", @days_offset, @_select);
@@ -61,10 +61,55 @@ EXECUTE stmt using @days_offset;
 CREATE INDEX user_id ON giovanni.ec30 (user_id);
 
 DEALLOCATE PREPARE stmt;
-
+*/
 -- join everything together
 DROP TABLE IF EXISTS giovanni.editcount;
-CREATE TABLE giovanni.editcount 
+CREATE TABLE giovanni.editcount (
+    user_id INT NOT NULL,
+    age SMALLINT NOT NULL,
+    editcount INT NOT NULL,
+    CONSTRAINT FOREIGN KEY (user_id) REFERENCES user (user_id),
+    INDEX user_age (user_id, age)
+)
+SELECT 
+    user_id,
+    1 AS age,
+    editcount
+FROM    
+    giovanni.ec1
+UNION
+SELECT 
+    user_id,
+    2 AS age,
+    editcount
+FROM    
+    giovanni.ec2
+UNION
+SELECT 
+    user_id,
+    5 AS age,
+    editcount
+FROM    
+    giovanni.ec5
+UNION
+SELECT 
+    user_id,
+    10 AS age,
+    editcount
+FROM    
+    giovanni.ec10
+UNION
+SELECT 
+    user_id,
+    30 AS age,
+    editcount
+FROM    
+    giovanni.ec30
+ORDER BY
+    user_id,
+    age
+
+/*
 SELECT
     e1.user_id,
     e1.editcount as ec1,
@@ -92,3 +137,4 @@ USING
     (user_id);
 
 CREATE INDEX user_id on giovanni.editcount (user_id);
+*/
