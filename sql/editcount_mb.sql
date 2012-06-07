@@ -93,4 +93,4 @@ ON
 WHERE
     b.user_id IS NULL
 GROUP BY
-    mbf_user_id;
+    user_id, age;
