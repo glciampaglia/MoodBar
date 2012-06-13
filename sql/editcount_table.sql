@@ -22,46 +22,47 @@ ON
 WHERE 
     IFNULL(udc.day, ept.ept_timestamp) - INTERVAL ? DAY <= DATE(ept.ept_timestamp)
     AND DATE(u.user_registration) >= @min_registration
+    AND DATE(NOW() - INTERVAL ? DAY) > DATE(ept.ept_timestamp)
 GROUP BY
     u.user_id";
-/*
+
 -- create temp table giovanni.ec1
 SET @days_offset=1; 
 SET @stmt=CONCAT(@_create, "giovanni.ec", @days_offset, @_select);
 PREPARE stmt FROM @stmt;
-EXECUTE stmt using @days_offset;
+EXECUTE stmt using @days_offset, @days_offset;
 CREATE INDEX user_id ON giovanni.ec1 (user_id);
 
 -- create temp table giovanni.ec2
 SET @days_offset=2; 
 SET @stmt=CONCAT(@_create, "giovanni.ec", @days_offset, @_select);
 PREPARE stmt FROM @stmt;
-EXECUTE stmt using @days_offset;
+EXECUTE stmt using @days_offset, @days_offset;
 CREATE INDEX user_id ON giovanni.ec2 (user_id);
 
 -- create temp table giovanni.ec5
 SET @days_offset=5; 
 SET @stmt=CONCAT(@_create, "giovanni.ec", @days_offset, @_select);
 PREPARE stmt FROM @stmt;
-EXECUTE stmt using @days_offset;
+EXECUTE stmt using @days_offset, @days_offset;
 CREATE INDEX user_id ON giovanni.ec5 (user_id);
 
 -- create temp table giovanni.ec10
 SET @days_offset=10; 
 SET @stmt=CONCAT(@_create, "giovanni.ec", @days_offset, @_select);
 PREPARE stmt FROM @stmt;
-EXECUTE stmt using @days_offset;
+EXECUTE stmt using @days_offset, @days_offset;
 CREATE INDEX user_id ON giovanni.ec10 (user_id);
 
 -- create temp table giovanni.ec30
 SET @days_offset=30; 
 SET @stmt=CONCAT(@_create, "giovanni.ec", @days_offset, @_select);
 PREPARE stmt FROM @stmt;
-EXECUTE stmt using @days_offset;
+EXECUTE stmt using @days_offset, @days_offset;
 CREATE INDEX user_id ON giovanni.ec30 (user_id);
 
 DEALLOCATE PREPARE stmt;
-*/
+
 -- join everything together
 DROP TABLE IF EXISTS giovanni.editcount;
 CREATE TABLE giovanni.editcount (
