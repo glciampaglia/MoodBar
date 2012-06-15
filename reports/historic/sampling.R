@@ -4,7 +4,7 @@
 require(sampling)
 
 # size of the sample
-S <- 1000
+S <- 10000
 
 # loads person-period data set
 EC <- read.table("data/ec.tsv", header=T, sep="\t")
@@ -17,10 +17,10 @@ p <- p / sum(p)
 sizes <- ceiling(p * S)
 
 # get the person-level dataset and run strata on it 
-EC.persons <- unique(EC[c("user_id", "treatment")])
-EC.sample <- strata(EC, c("treatment"), sizes, method="srswor")
-user.ids <- getdata(EC, EC.sample)$user_id
+EC.pl <- unique(EC[c("user_id", "treatment")])
+EC.strata <- strata(EC, c("treatment"), sizes, method="srswor")
+EC.ids <- getdata(EC, EC.strata)$user_id
 
 # take sampled subset and write table to file
-EC.1000 <- subset(EC, user_id %in% user.ids)
-write.table(EC.1000, "data/ec_1000.tsv", quote=F, sep="\t")
+EC.sample <- subset(EC, user_id %in% EC.ids)
+write.table(EC.sample, sprintf("data/ec_%d.tsv", S), quote=F, sep="\t")

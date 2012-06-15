@@ -3,16 +3,17 @@ require(MASS) # glm.nb
 require(ggplot2)
 
 EC <- read.table('data/ec_mb.tsv', sep='\t', header=T, stringsAsFactors=T)
-# relevel factors
-EC <- within(EC, 
-             user_id<-factor(user_id),
-             treatment<-factor(treatment), 
-             namespace<-relevel(namespace, ref="Main"),
-             browser<-relevel(browser, ref="msie"),
-             os<-relevel(os, ref="win"),
-             mood<-relevel(mood, ref="happy"),
-             )
-levels(EC$treatment)<-c("Feedback", "Feed+Resp.", "Feed+Useful")
+
+# relevel factors, make treatment a factor
+EC$user_id <- as.factor(EC$user_id)
+EC$namespace <- relevel(EC$namespace, ref="Main")
+EC$browser <-relevel(EC$browser, ref="msie")
+EC$os <- relevel(EC$os, ref="win")
+EC$mood <- relevel(EC$mood, ref="happy")
+EC$treatment <- as.factor(EC$treatment)
+levels(EC$treatment) <- c("Feedback", "Feed+Resp.", "Feed+Useful")
+
+# print summary before rescaling
 summary(EC)
 
 # rescale control variables
@@ -34,13 +35,31 @@ print(cond.size)
 print(cond.mean)
 print(cond.std)
 
-# # Plot smoothed growth curves as function of treatment and mood
-# p <- ggplot(EC, aes(age, editcount, colour=mood, linestyle=treatment)) + geom_smooth(se=F, method=loess)
-# p + xlab("Days since activation") + ylab("Avg. edit count")
-# ggsave("moodbar_loess.png", width=6, height=4)
+# make a barplot of the cond.mean, with standard errors of the mean
+cmeans <- data.frame(
+                     cond.size=as.vector(cond.size),
+                     cond.mean=as.vector(cond.mean),
+                     cond.std=as.vector(cond.std),
+                     treatment=rep(unlist(dimnames(cond.mean)[[1]]), 5),
+                     age=rep(as.vector(dimnames(cond.mean)[[2]], mode="numeric"),
+                             each=3)
+                     )
+ggplot(cmeans, aes(x = factor(treatment), y = cond.mean)) +
+geom_bar(color="black", fill="white") + facet_grid(~ age) +
+geom_errorbar(aes(ymax = cond.mean + cond.std / sqrt(cond.size), ymin =
+                  cond.mean - cond.std / sqrt(cond.size), width=0.25)) +
+xlab("Days since activation of MoodBar") + ylab("Avg. editcount")
+ggsave("barplot_mb_stderr.png", width=14, height=5)
 
-# base model
-MoodBar.nb.base <- glm.nb(editcount ~ I(age - 1) + treatment + mood + cohort,
+# Plot smoothed growth curves as function of treatment and mood
+p <- ggplot(EC, aes(age, editcount, colour=mood, linestyle=treatment)) +
+geom_smooth(se=F, method=loess) + xlab("Days since activation") + ylab("Avg.
+                                                                         edit
+                                                                         count")
+ggsave("moodbar_loess.png", width=6, height=4)
+
+# base model (age interacts with treatment and mood by default)
+MoodBar.nb.base <- glm.nb(editcount ~ I(age - 1) * (treatment + mood) + cohort,
                           data=EC)
 print(summary(MoodBar.nb.base))
 anova(MoodBar.nb.base, test="Chisq")
@@ -62,3 +81,37 @@ anova(MoodBar.nb.cont, test="Chisq")
 MoodBar.nb.addcont <- update(MoodBar.nb.cont, . ~ . + namespace + browser + os + feedback_lag)
 print(summary(MoodBar.nb.addcont))
 anova(MoodBar.nb.addcont, test="Chisq")
+
+# Make new data frame with control variables set to their mean values
+EC.pred <- data.frame(age <- rep(1:30, 3),
+                      treatment <- factor(rep(levels(EC$treatment), each=30)), 
+                      mood <- factor(rep(levels(EC$mood), 30)),
+                      cohort <- rep(mean(EC$cohort), 90), 
+                      ept_lag <- rep(mean(EC$ept_lag), 90),
+                      feedback_lag <- rep(mean(EC$feedback_lag), 90),
+                      is_editing <- rep(mean(EC$is_editing), 90),
+                      feedback_editcount <- rep(mean(EC$feedback_editcount),
+                                                90),
+                      num_feedbacks <- rep(mean(EC$num_feedbacks), 90),
+                      namespace <- factor(rep("Main", 90)),
+                      feedback_len <- rep(mean(EC$feedback_len, 90)),
+                      os <- factor(rep("win", 90)),
+                      browser <- factor(rep("msie", 90))
+                      )
+
+# give the data frame nice column names...
+names(EC.pred) <- c("age", "treatment", "mood", "cohort", "ept_lag",
+                    "feedback_lag", "is_editing", "feedback_editcount",
+                    "num_feedbacks", "namespace", "feedback_len", "os",
+                    "browser")
+
+# ...and adjust dimension for those variable that need it, otherwise predict()
+# will complain (don't ask yourself why cohort needs to be a (90x1) matrix
+# though...
+dim(EC.pred$cohort) <- c(90,1)
+
+# compute average population prediction of editcount and plot lines
+EC.pred$editcount <- predict(MoodBar.nb.addcont, EC.pred)
+p <- ggplot(EC.pred, aes(y=editcount, x=age, colour=mood, linetype=treatment)) +
+geom_line() + xlab("Days since activation") + ylab("Avg. edit count") 
+ggsave("moodbar_predict.png", width=6, height=4) 
