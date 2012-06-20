@@ -93,4 +93,5 @@ ON
 WHERE
     b.user_id IS NULL
 GROUP BY
-    user_id, age;
+    ept_user,
+    age;

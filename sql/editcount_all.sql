@@ -3,7 +3,7 @@ CREATE TEMPORARY TABLE IF NOT EXISTS
     (
         mah_id int primary key, 
         mah_item int,
-        constraint foreign key mbfr_item (mah_item) references moodbar_feedback_response (mbf_id)
+        constraint foreign key mbfr_item (mah_item) references moodbar_feedback_response (mbfr_id)
     ) 
     SELECT 
         mah_id,
@@ -28,7 +28,7 @@ SELECT
             mbfr_id IS NOT NULL, 
             2, 
             IF(
-                mbf_id IS NOT NULL, 
+                MIN(mbf_id) IS NOT NULL, 
                 1, 
                 0
             )
@@ -53,7 +53,7 @@ JOIN
 ON 
     ept_user = ec.user_id 
 LEFT JOIN 
-    moodbar_feedback 
+    moodbar_feedback
 ON 
     ept_user = mbf_user_id 
 LEFT JOIN 
@@ -69,4 +69,7 @@ LEFT JOIN
 ON 
     ept_user = b.user_id
 WHERE
-    b.user_id IS NULL;
+    b.user_id IS NULL
+GROUP BY
+    ept_user,
+    age;
