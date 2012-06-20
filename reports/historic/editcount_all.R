@@ -32,12 +32,15 @@ cmeans <- data.frame(
                      age=rep(as.vector(dimnames(cond.mean)[[2]], mode="numeric"),
                              each=4)
                      )
+cmeans$type <- as.factor(cmeans$treatment == "Reference")
+levels(cmeans$type) <- c("MoodBar user", "Active user")
 ggplot(cmeans, aes(x = factor(treatment), y = cond.mean)) +
-geom_bar(color="black", fill="white") + facet_grid(~ age) +
+geom_bar(aes(fill=type)) + facet_grid(~ age) +
 geom_errorbar(aes(ymax = cond.mean + cond.std / sqrt(cond.size), ymin =
                   cond.mean - cond.std / sqrt(cond.size), width=0.25)) +
-xlab("Days since activation of MoodBar") + ylab("Avg. editcount")
-ggsave("barplot_all_stderr.png", width=16, height=5)
+xlab("Days since activation of MoodBar") + ylab("Avg. editcount") +
+scale_fill_brewer(palette="Set2")
+ggsave("barplot_all_stderr.png", width=18, height=5)
 
 # ## This takes too long ... maybe try different method?
 # # Plot smoothed growth curves as function of treatment and mood
@@ -55,6 +58,9 @@ All.nb.control <- update(All.nb.base, . ~ . + ept_lag)
 print(summary(All.nb.control))
 anova(All.nb.control, test="Chisq")
 
+# The best should be All.nb.control
+AIC(All.nb.base, All.nb.control)
+
 # Make new data frame with control variable set to its mean
 EC.pred <- data.frame(age = rep(1:30, 4),
                       treatment = factor(rep(levels(EC$treatment), each=30)), 
@@ -69,9 +75,10 @@ names(EC.pred) <- c("age", "treatment", "cohort", "ept_lag")
 dim(EC.pred$ept_lag) <- c(120,1)
 
 # compute average population prediction of editcount and plot lines
-EC.pred$editcount <- predict(All.nb.control, EC.pred)
-p <- ggplot(EC.pred, aes(y = editcount, x= age, linetype=treatment)) + geom_line()
-p + xlab("Days since activation") + ylab("Avg. edit count") 
+EC.pred$editcount <- predict(All.nb.control, EC.pred, type="response")
+p <- ggplot(EC.pred, aes(y = editcount, x= age, linetype=treatment)) +
+geom_line() + xlab("Days since activation") + ylab("Avg. edit count") +
+scale_linetype_manual(values=c("solid", "dashed", "dotted", "dotdash"))
 ggsave("all_predict.png", width=6, height=4) 
 
 ## # Uncomment the following for other alternatives

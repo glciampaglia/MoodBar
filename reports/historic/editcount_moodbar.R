@@ -52,15 +52,17 @@ xlab("Days since activation of MoodBar") + ylab("Avg. editcount")
 ggsave("barplot_mb_stderr.png", width=14, height=5)
 
 # Plot smoothed growth curves as function of treatment and mood
-p <- ggplot(EC, aes(age, editcount, colour=mood, linestyle=treatment)) +
-geom_smooth(se=F, method=loess) + xlab("Days since activation") + ylab("Avg.
-                                                                         edit
-                                                                         count")
-ggsave("moodbar_loess.png", width=6, height=4)
+p <- ggplot(EC, aes(age, editcount, colour=mood)) + 
+facet_grid(. ~ treatment) + geom_smooth(se=F, method=loess)
+p <- p + stat_summary(aes(age, editcount), fun.y=mean, color="black",
+                      fun.ymin = function(y) { mean(y) - sd(y) / sqrt(length(y)) },
+                      fun.ymax = function(y) { mean(y) + sd(y) / sqrt(length(y)) })  
+p + xlab("Days since activation") + ylab("Avg. edit count")
+ggsave("moodbar_loess.png", width=10, height=3)
 
 # base model (age interacts with treatment and mood by default)
 MoodBar.nb.base <- glm.nb(editcount ~ I(age - 1) * (treatment + mood) + cohort,
-                          data=EC)
+                          data=EC, control=glm.control(trace=F, maxit=300))
 print(summary(MoodBar.nb.base))
 anova(MoodBar.nb.base, test="Chisq")
 
@@ -81,6 +83,9 @@ anova(MoodBar.nb.cont, test="Chisq")
 MoodBar.nb.addcont <- update(MoodBar.nb.cont, . ~ . + namespace + browser + os + feedback_lag)
 print(summary(MoodBar.nb.addcont))
 anova(MoodBar.nb.addcont, test="Chisq")
+
+# The best should be MoodBar.nb.addcont
+AIC(MoodBar.nb.base, MoodBar.nb.int, MoodBar.nb.cont, MoodBar.nb.addcont)
 
 # Make new data frame with control variables set to their mean values
 EC.pred <- data.frame(age <- rep(1:30, 3),
@@ -111,7 +116,8 @@ names(EC.pred) <- c("age", "treatment", "mood", "cohort", "ept_lag",
 dim(EC.pred$cohort) <- c(90,1)
 
 # compute average population prediction of editcount and plot lines
-EC.pred$editcount <- predict(MoodBar.nb.addcont, EC.pred)
-p <- ggplot(EC.pred, aes(y=editcount, x=age, colour=mood, linetype=treatment)) +
-geom_line() + xlab("Days since activation") + ylab("Avg. edit count") 
-ggsave("moodbar_predict.png", width=6, height=4) 
+EC.pred$editcount <- predict(MoodBar.nb.addcont, EC.pred, type="response")
+p <- ggplot(EC.pred, aes(y=editcount, x=age, colour=mood)) + 
+facet_grid(. ~ treatment) + geom_line() + xlab("Days since activation") + 
+ylab("Avg. edit count") 
+ggsave("moodbar_predict.png", width=10, height=3) 
