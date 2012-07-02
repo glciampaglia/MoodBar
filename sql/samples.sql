@@ -16,9 +16,14 @@ CREATE TEMPORARY TABLE IF NOT EXISTS
 
 SET @treatment_start_date='20120523140000';
 SET @treatment_stop_date='20120613000000';
+SET @control_start_date='20120614000000';
+SET @control_stop_date='20120629000000';
 
 /* Treatment sample size */
 SELECT
+    DATE(@treatment_start_date) as start_date,
+    DATE(@treatment_stop_date) as stop_date,
+    DATEDIFF(@treatment_stop_date, @treatment_start_date) as days,
     /* total number of moodbar activations */
     COUNT(ept_user) AS nr_reference,
     /* total number of users who sent a feedback */
@@ -48,14 +53,18 @@ ON
 WHERE
     user_registration >= @treatment_start_date
 AND
-    user_registration < @treatment_stop_date;
+    user_registration < @treatment_stop_date
 
-
-SET @control_start_date='20120614000000';
-SET @control_stop_date='20120629000000';
+UNION
 
 SELECT 
-    count(ept_user) AS nr_reference
+    DATE(@control_start_date) as start_date,
+    DATE(@control_stop_date) as stop_date,
+    DATEDIFF(@control_stop_date, @control_start_date) as days,
+    count(ept_user) AS nr_reference,
+    'N/A' as nr_feedback,
+    'N/A' as nr_response,
+    'N/A' as nr_useful
 FROM
     user
 JOIN
