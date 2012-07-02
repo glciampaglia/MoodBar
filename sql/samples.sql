@@ -6,7 +6,7 @@ CREATE TEMPORARY TABLE IF NOT EXISTS
     (
         mah_id int primary key, 
         mah_item int,
-        constraint foreign key mbfr_item (mah_item) references moodbar_feedback_response (mbf_id)
+        constraint foreign key mbfr_item (mah_item) references moodbar_feedback_response (mbfr_id)
     ) 
     SELECT 
         mah_id,
@@ -14,28 +14,25 @@ CREATE TEMPORARY TABLE IF NOT EXISTS
     FROM 
         mark_as_helpful;
 
-/* Each uses is assigned to one (and only one) sample based on the day of
- * activation of moodbar. Samples correspond to 7 days intervals, with reference
- * date equal to the date of introduction of the temporary UI enhancements
- * (2012-05-23). To allow for a fair comparison between older and newer
- * intervals, only feedbacks/posts/markings performed within the first 7 days
- * since activation are counted.
- */
+SET @treatment_start_date='20120523140000';
+SET @treatment_stop_date='20120613000000';
+
+/* Treatment sample size */
 SELECT
-    /* day of start of sample interval */
-    MIN(DATE(ept_timestamp)) AS start_day,
-    /* day of end of sample interval */
-    MAX(DATE(ept_timestamp)) as end_day,
     /* total number of moodbar activations */
-    COUNT(ept_user) AS n_total,
+    COUNT(ept_user) AS nr_reference,
     /* total number of users who sent a feedback */
-    COUNT(DISTINCT mbf_user_id) AS n_feedback,
+    COUNT(DISTINCT mbf_user_id) AS nr_feedback,
     /* total number of users who received at least one response */
-    COUNT(DISTINCT mbfr_mbf_id) AS n_responses,
+    COUNT(DISTINCT mbfr_mbf_id) AS nr_response,
     /* total number of users who marked at least on response as useful */
-    COUNT(DISTINCT mah_item) AS n_useful
-FROM 
+    COUNT(DISTINCT mah_item) AS nr_useful
+FROM
+    user
+JOIN
     edit_page_tracking
+ON
+    user_id = ept_user
 LEFT JOIN
     moodbar_feedback
 ON
@@ -49,8 +46,23 @@ LEFT JOIN
 ON
     mbfr_id = mah_item 
 WHERE
-    IFNULL(mbf_timestamp, ept_timestamp) - INTERVAL 7 DAY <= DATE(ept_timestamp)
-GROUP BY
-    CEIL(DATEDIFF(ept_timestamp, '2012-05-23') / 7)
-ORDER BY 
-    ept_timestamp;
+    user_registration >= @treatment_start_date
+AND
+    user_registration < @treatment_stop_date;
+
+
+SET @control_start_date='20120614000000';
+SET @control_stop_date='20120629000000';
+
+SELECT 
+    count(ept_user) AS nr_reference
+FROM
+    user
+JOIN
+    edit_page_tracking
+ON
+    user_id = ept_user
+WHERE
+    user_registration >= @control_start_date
+AND
+    user_registration <= @control_stop_date;
