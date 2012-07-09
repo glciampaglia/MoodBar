@@ -11,7 +11,7 @@ EC$browser <-relevel(EC$browser, ref="msie")
 EC$os <- relevel(EC$os, ref="win")
 EC$mood <- relevel(EC$mood, ref="happy")
 EC$treatment <- as.factor(EC$treatment)
-levels(EC$treatment) <- c("Feedback", "Feed+Resp.", "Feed+Useful")
+levels(EC$treatment) <- c("Feedback", "Feedback+Response", "Feedback+Helpful")
 
 # print summary before rescaling
 summary(EC)

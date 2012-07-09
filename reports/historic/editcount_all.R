@@ -7,7 +7,7 @@ EC <- read.table('data/ec.tsv', sep='\t', header=T, stringsAsFactors=T)
 
 # make treatment a factor
 EC$treatment <- factor(EC$treatment)
-levels(EC$treatment) <- c("Reference", "Feedback", "Feed+Resp.", "Feed+Useful")
+levels(EC$treatment) <- c("Reference", "Feedback", "Feedback+Response", "Feedback+Helpful")
 
 # print summary
 summary(EC)
@@ -39,7 +39,8 @@ geom_bar(aes(fill=type)) + facet_grid(~ age) +
 geom_errorbar(aes(ymax = cond.mean + cond.std / sqrt(cond.size), ymin =
                   cond.mean - cond.std / sqrt(cond.size), width=0.25)) +
 xlab("Days since activation of MoodBar") + ylab("Avg. editcount") +
-scale_fill_brewer(palette="Set2")
+scale_fill_brewer(palette="Set2", name="group") +
+opts(axis.text.x=theme_text(angle=-45, hjust=0.5))
 ggsave("barplot_all_stderr.png", width=18, height=5)
 
 # ## This takes too long ... maybe try different method?
