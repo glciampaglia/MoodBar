@@ -62,11 +62,11 @@ SELECT
     COUNT(DISTINCT mbf_timestamp) AS num_feedbacks,
     /* User has an authenticated email */
     user_email_authenticated IS NOT NULL AS has_email,
-    /* Was email authenticated within 1 days of feedback ? */
+    /* Was email authenticated within 1 day of feedback ? */
     IFNULL(user_email_authenticated, mbf_timestamp) > mbf_timestamp
         AND
-        user_email_authenticated - INTERVAL 3 DAY <= mbf_timestamp
-        as auth_email_3d
+        user_email_authenticated - INTERVAL 1 DAY <= mbf_timestamp
+        as auth_email_1d
 FROM 
     edit_page_tracking 
 JOIN
