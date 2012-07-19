@@ -61,12 +61,11 @@ SELECT
     /* Total number of feedback messages sent */
     COUNT(DISTINCT mbf_timestamp) AS num_feedbacks,
     /* User has an authenticated email */
-    user_email_authenticated IS NOT NULL AS has_email,
-    /* Was email authenticated within 1 day of feedback ? */
-    IFNULL(user_email_authenticated, mbf_timestamp) > mbf_timestamp
-        AND
-        user_email_authenticated - INTERVAL 1 DAY <= mbf_timestamp
-        as auth_email_1d
+    user_email_authenticated IS NOT NULL AS auth_email,
+    /* Was email authenticated after first feedback? */
+    IFNULL(
+        user_email_authenticated, 
+        mbf_timestamp) > mbf_timestamp as auth_mb_funnel
 FROM 
     edit_page_tracking 
 JOIN
