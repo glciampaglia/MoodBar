@@ -3,11 +3,12 @@ data/*
 .*.swp
 data
 .Rproj.user
-.RData
+*.R[dD]ata
 .Rhistory
 *.aux
 *.log
 *.pdf
+*.txt
+*.png
 *.tex
 plots
-reports
