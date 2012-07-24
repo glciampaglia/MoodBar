@@ -1,8 +1,10 @@
+setwd("../..")
+
 require(gdata) # aggregate.table
 require(MASS) # glm.nb
 require(ggplot2)
 
-EC <- read.table('data/ec_mb.tsv', sep='\t', header=T, stringsAsFactors=T)
+EC <- read.table('data/ec_mb_email.tsv', sep='\t', header=T, stringsAsFactors=T)
 
 # relevel factors, make treatment a factor
 EC$user_id <- as.factor(EC$user_id)
@@ -84,10 +86,19 @@ MoodBar.nb.addcont <- update(MoodBar.nb.cont, . ~ . + namespace + browser + os +
 print(summary(MoodBar.nb.addcont))
 anova(MoodBar.nb.addcont, test="Chisq")
 
+# controlling for email
+MoodBar.nb.addemail <- update(MoodBar.nb.addcont, . ~ . + auth_email 
+                              + auth_mb_funnel)
+print(summary(MoodBar.nb.addemail))
+anova(MoodBar.nb.addemail, test="Chisq")
+
 # The best should be MoodBar.nb.addcont
-AIC(MoodBar.nb.base, MoodBar.nb.int, MoodBar.nb.cont, MoodBar.nb.addcont)
+AIC(MoodBar.nb.base, MoodBar.nb.int, MoodBar.nb.cont, MoodBar.nb.addcont,
+    MoodBar.nb.addemail)
 
 # Make new data frame with control variables set to their mean values
+# because the dataset is balanced (all users have exactly 5 observations each,
+# it is OK to compute averages on the person-period dataset
 EC.pred <- data.frame(age <- rep(1:30, 3),
                       treatment <- factor(rep(levels(EC$treatment), each=30)), 
                       mood <- factor(rep(levels(EC$mood), 30)),
@@ -101,14 +112,16 @@ EC.pred <- data.frame(age <- rep(1:30, 3),
                       namespace <- factor(rep("Main", 90)),
                       feedback_len <- rep(mean(EC$feedback_len, 90)),
                       os <- factor(rep("win", 90)),
-                      browser <- factor(rep("msie", 90))
+                      browser <- factor(rep("msie", 90)),
+                      auth_email <- rep(mean(EC$auth_email), 90),
+                      auth_mb_funnel <- rep(mean(EC$auth_mb_funnel), 90)
                       )
 
 # give the data frame nice column names...
 names(EC.pred) <- c("age", "treatment", "mood", "cohort", "ept_lag",
                     "feedback_lag", "is_editing", "feedback_editcount",
                     "num_feedbacks", "namespace", "feedback_len", "os",
-                    "browser")
+                    "browser", "auth_email", "auth_mb_funnel")
 
 # ...and adjust dimension for those variable that need it, otherwise predict()
 # will complain (don't ask yourself why cohort needs to be a (90x1) matrix
@@ -116,7 +129,7 @@ names(EC.pred) <- c("age", "treatment", "mood", "cohort", "ept_lag",
 dim(EC.pred$cohort) <- c(90,1)
 
 # compute average population prediction of editcount and plot lines
-EC.pred$editcount <- predict(MoodBar.nb.addcont, EC.pred, type="response")
+EC.pred$editcount <- predict(MoodBar.nb.addemail, EC.pred, type="response")
 p <- ggplot(EC.pred, aes(y=editcount, x=age, colour=mood)) + 
 facet_grid(. ~ treatment) + geom_line() + xlab("Days since activation") + 
 ylab("Avg. edit count") 
