@@ -3,96 +3,120 @@
     All users since 2012-12-14.
  */
 
+CREATE TEMPORARY TABLE IF NOT EXISTS
+    giovanni.mark_as_helpful 
+    (
+        mah_id int primary key, 
+        mah_item int,
+        constraint foreign key mbfr_item (mah_item) references moodbar_feedback_response (mbfr_id)
+    ) 
+    SELECT 
+        mah_id,
+        mah_item
+    FROM 
+        mark_as_helpful;
+
 -- all users
 SELECT 
-    AVG(ret1), 
-    ROUND(STDDEV_SAMP(ret1) / SQRT(COUNT(user_id)),4) AS err1, 
-    AVG(ret2), 
-    ROUND(STDDEV_SAMP(ret2) / SQRT(COUNT(user_id)),4) AS err2, 
-    AVG(ret5), 
-    ROUND(STDDEV_SAMP(ret5) / SQRT(COUNT(USER_ID)), 4) AS err5, 
-    AVG(ret10), 
-    ROUND(STDDEV_SAMP(ret10) / SQRT(COUNT(user_id)), 4) AS err10, 
-    AVG(ret30), 
-    ROUND(STDDEV_SAMP(ret30) / SQRT(COUNT(USER_ID)), 4) AS err30 
-FROM 
-    giovanni.retention;
+    "reference" as treatment,
+    age,
+    'N/A' as mood,
+    AVG(retention) as avg_retention,
+    STDDEV_SAMP(retention) as std_retention
+FROM
+    giovanni.retention
+GROUP BY
+    age
 
--- all moodbar users (should discount the feedback contribution)
-SELECT 
-    AVG(ret1), 
-    ROUND(STDDEV_SAMP(ret1) / SQRT(COUNT(user_id)),4) AS err1, 
-    AVG(ret2), 
-    ROUND(STDDEV_SAMP(ret2) / SQRT(COUNT(user_id)),4) AS err2, 
-    AVG(ret5), 
-    ROUND(STDDEV_SAMP(ret5) / SQRT(COUNT(USER_ID)), 4) AS err5, 
-    AVG(ret10), 
-    ROUND(STDDEV_SAMP(ret10) / SQRT(COUNT(user_id)), 4) AS err10, 
-    AVG(ret30), 
-    ROUND(STDDEV_SAMP(ret30) / SQRT(COUNT(USER_ID)), 4) AS err30 
+-- all moodbar users 
+UNION SELECT 
+    "moodbar",
+    age,
+    mbf_type,
+    AVG(retention) as avg_retention,
+    STDDEV_SAMP(retention) as std_retention
 FROM 
     giovanni.retention
-WHERE
-    user_id in (
-        SELECT
-            DISTINCT mbf_user_id
-        FROM
-            moodbar_feedback
-    );
+JOIN
+(
+    SELECT
+        mbf_user_id,
+        mbf_type,
+        MIN(mbf_timestamp)
+    FROM
+        moodbar_feedback
+    GROUP BY
+        mbf_user_id
+) a
+ON
+    mbf_user_id = user_id
+GROUP BY
+    age,
+    mbf_type
+WITH ROLLUP
 
--- all moodbar users who rreteived at least one response (should discount the feedback contribution)
-SELECT 
-    AVG(ret1), 
-    ROUND(STDDEV_SAMP(ret1) / SQRT(COUNT(user_id)),4) AS err1, 
-    AVG(ret2), 
-    ROUND(STDDEV_SAMP(ret2) / SQRT(COUNT(user_id)),4) AS err2, 
-    AVG(ret5), 
-    ROUND(STDDEV_SAMP(ret5) / SQRT(COUNT(USER_ID)), 4) AS err5, 
-    AVG(ret10), 
-    ROUND(STDDEV_SAMP(ret10) / SQRT(COUNT(user_id)), 4) AS err10, 
-    AVG(ret30), 
-    ROUND(STDDEV_SAMP(ret30) / SQRT(COUNT(USER_ID)), 4) AS err30 
+-- all moodbar users who received at least one response 
+UNION SELECT 
+    "feedback+response",
+    age,
+    mbf_type,
+    AVG(retention) as avg_retention,
+    STDDEV_SAMP(retention) as std_retention
 FROM 
     giovanni.retention
-WHERE
-    user_id in (
-        SELECT 
-            DISTINCT mbf_user_id
-        FROM
-            moodbar_feedback
-        JOIN
-            moodbar_feedback_response
-        ON
-            mbf_id = mbfr_mbf_id
-    );
+JOIN
+(
+    SELECT
+        mbf_user_id,
+        mbf_type,
+        MIN(mbf_timestamp)
+    FROM
+        moodbar_feedback
+    JOIN
+        moodbar_feedback_response
+    ON
+        mbf_id = mbfr_mbf_id
+    GROUP BY
+        mbf_user_id
+) a
+ON
+    mbf_user_id = user_id
+GROUP BY
+    age,
+    mbf_type
+WITH ROLLUP
 
--- all moodbar users who rreteived at least a useful response (should discount the feedback contribution)
-SELECT 
-    AVG(ret1), 
-    ROUND(STDDEV_SAMP(ret1) / SQRT(COUNT(user_id)),4) AS err1, 
-    AVG(ret2), 
-    ROUND(STDDEV_SAMP(ret2) / SQRT(COUNT(user_id)),4) AS err2, 
-    AVG(ret5), 
-    ROUND(STDDEV_SAMP(ret5) / SQRT(COUNT(USER_ID)), 4) AS err5, 
-    AVG(ret10), 
-    ROUND(STDDEV_SAMP(ret10) / SQRT(COUNT(user_id)), 4) AS err10, 
-    AVG(ret30), 
-    ROUND(STDDEV_SAMP(ret30) / SQRT(COUNT(USER_ID)), 4) AS err30 
+-- all moodbar users who recevived at least a helpful response 
+UNION SELECT 
+    "feedback+helpful",
+    age,
+    mbf_type,
+    AVG(retention) as avg_retention,
+    STDDEV_SAMP(retention) as std_retention
 FROM 
     giovanni.retention
-WHERE
-    user_id 
-    IN (
-        SELECT 
-            DISTINCT mbf_user_id
-        FROM
-            moodbar_feedback
-        JOIN
-            moodbar_feedback_response
-        ON
-            mbf_id = mbfr_mbf_id
-        JOIN 
-            mark_as_helpful
-        ON
-            mbfr_id = mah_item
-    );
+JOIN
+(
+    SELECT
+        mbf_user_id,
+        mbf_type,
+        MIN(mbf_timestamp)
+    FROM
+        moodbar_feedback
+    JOIN
+        moodbar_feedback_response
+    ON
+        mbf_id = mbfr_mbf_id
+    JOIN
+        giovanni.mark_as_helpful
+    on
+        mbfr_id = mah_item
+    GROUP BY
+        mbf_user_id
+) a
+ON
+    mbf_user_id = user_id
+GROUP BY
+    age,
+    mbf_type
+WITH ROLLUP;
