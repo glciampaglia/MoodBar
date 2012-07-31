@@ -2,8 +2,8 @@
     Create a table with editcount at 1, 2, 5, 10, and 30 days since first edit click
 */
 
-SET @min_registration='2011-12-14'; -- phase 3 of MoodBar deployed
-SET @max_registration='2012-05-22'; -- temporary UI enhancements deployed
+SET @min_registration='20111214'; -- phase 3 of MoodBar deployed
+SET @max_registration='20120522'; -- temporary UI enhancements deployed
 SET @db='giovanni'; -- change it to whatever you need
 
 SET @_create="CREATE TEMPORARY TABLE IF NOT EXISTS ";
@@ -25,10 +25,17 @@ LEFT JOIN
     user_daily_contribs udc
 ON 
     u.user_id = udc.user_id
-WHERE 
-    DATE(u.user_registration) >= @min_registration
+LEFT JOIN
+    rfaulk.globaluser
+ON
+    user_name = gu_name
+WHERE
+-- only users that registered locally on enwiki within the eligibility window 
+    u.user_registration >= @min_registration
     AND
-    DATE(u.user_registration) < @max_registration
+    u.user_registration < @max_registration
+    AND
+    u.user_registration <= IFNULL(gu_registration, user_registration)
 GROUP BY
     u.user_id";
 
@@ -79,7 +86,7 @@ EXECUTE index_stmt;
 
 DEALLOCATE PREPARE stmt;
 
--- join everything together
+-- merge all tables together
 DROP TABLE IF EXISTS giovanni.editcount;
 CREATE TABLE giovanni.editcount (
     user_id INT NOT NULL,
@@ -94,29 +101,25 @@ SELECT
     editcount
 FROM    
     giovanni.ec1
-UNION
-SELECT 
+UNION SELECT 
     user_id,
     2 AS age,
     editcount
 FROM    
     giovanni.ec2
-UNION
-SELECT 
+UNION SELECT 
     user_id,
     5 AS age,
     editcount
 FROM    
     giovanni.ec5
-UNION
-SELECT 
+UNION SELECT 
     user_id,
     10 AS age,
     editcount
 FROM    
     giovanni.ec10
-UNION
-SELECT 
+UNION SELECT 
     user_id,
     30 AS age,
     editcount

@@ -1,7 +1,8 @@
 SELECT
     "all users" AS category,
-    -- percentage of accounts with an authenticated email 
-    SUM(user_email_authenticated IS NOT NULL) / COUNT(user_id) AS email_ratio,
+    -- percentage of accounts with an authenticated email. Note that COUNT(expr)
+    -- returns the count of non-NULL values of expr.
+    COUNT(user_email_authenticated) / COUNT(user_id) AS email_ratio,
 
     -- average lag (in seconds) between account registration and email
     -- authentication 
@@ -16,13 +17,17 @@ SELECT
     COUNT(user_id) AS num_accounts
 FROM
     user
+LEFT JOIN
+    rfaulk.globaluser
+ON
+    user_name = gu_name
 WHERE
+    -- take only users that registered the account on enwiki
+    user_registration <= IFNULL(gu_registration, user_registration) 
 
-UNION
-
-SELECT
+UNION SELECT
     "active users",
-    SUM(user_email_authenticated IS NOT NULL) / COUNT(user_id),
+    COUNT(user_email_authenticated) / COUNT(user_id) AS email_ratio,
     AVG(UNIX_TIMESTAMP(user_email_authenticated) 
       - UNIX_TIMESTAMP(user_registration)) AS avg_email_lag,
     STD(UNIX_TIMESTAMP(user_email_authenticated) 
@@ -34,12 +39,16 @@ JOIN
     edit_page_tracking
 ON
     user_id = ept_user
+LEFT JOIN
+    rfaulk.globaluser
+ON
+    user_name = gu_name
+WHERE
+    user_registration <= IFNULL(gu_registration, user_registration) 
 
-UNION
-
-SELECT
+UNION SELECT
     "moodbar users",
-    SUM(user_email_authenticated IS NOT NULL) / COUNT(user_id),
+    COUNT(user_email_authenticated) / COUNT(user_id) AS email_ratio,
     AVG(UNIX_TIMESTAMP(user_email_authenticated) 
       - UNIX_TIMESTAMP(user_registration)) AS avg_email_lag,
     STD(UNIX_TIMESTAMP(user_email_authenticated) 
@@ -54,4 +63,11 @@ ON
 JOIN
     moodbar_feedback
 ON
-    user_id = mbf_user_id;
+    user_id = mbf_user_id
+LEFT JOIN
+    rfaulk.globaluser
+ON
+    user_name = gu_name
+WHERE
+    user_registration <= IFNULL(gu_registration, user_registration);
+
