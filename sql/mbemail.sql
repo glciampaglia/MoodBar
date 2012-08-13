@@ -19,7 +19,7 @@ FROM (
         user_registration <= IFNULL(gu_registration, user_registration) 
     AND
         /* registered after MoodBar phase 3 on enwiki */
-        user_registration > 20111214
+        user_registration > '20111214'
     GROUP BY
         user_id
     HAVING
@@ -42,7 +42,7 @@ ON
 WHERE
     user_registration <= IFNULL(gu_registration, user_registration)
 AND
-    user_registration > 20111214
+    user_registration > '20111214'
 AND
     user_email_authenticated IS NOT NULL;
 

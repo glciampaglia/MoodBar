@@ -25,7 +25,7 @@ WHERE
     -- take only users that registered the account on enwiki
     user_registration <= IFNULL(gu_registration, user_registration) 
 AND
-    user_registration > 20111214
+    user_registration > '20111214'
 
 UNION SELECT
     "active users",
@@ -48,7 +48,7 @@ ON
 WHERE
     user_registration <= IFNULL(gu_registration, user_registration) 
 AND
-    user_registration > 20111214
+    user_registration > '20111214'
 
 UNION SELECT
     "moodbar users",
@@ -75,5 +75,5 @@ ON
 WHERE
     user_registration <= IFNULL(gu_registration, user_registration)
 AND
-    user_registration > 20111214;
+    user_registration > '20111214';
 
