@@ -98,7 +98,7 @@ EXECUTE index_stmt;
 DEALLOCATE PREPARE stmt;
 DEALLOCATE PREPARE index_stmt;
 
--- join everything together
+-- put everything together
 DROP TABLE IF EXISTS giovanni.retention;
 CREATE TABLE giovanni.retention (
     user_id INT NOT NULL,

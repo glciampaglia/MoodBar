@@ -20,9 +20,10 @@ CREATE TEMPORARY TABLE IF NOT EXISTS
 SELECT 
     "reference" as treatment,
     age,
-    'N/A' as mood,
-    AVG(retention) as avg_retention,
-    STDDEV_SAMP(retention) as std_retention
+    NULL as mood,
+    AVG(retention) as retention,
+    STDDEV_SAMP(retention) as retention_std,
+    COUNT(user_id) as size
 FROM
     giovanni.retention
 GROUP BY
@@ -33,8 +34,9 @@ UNION SELECT
     "moodbar",
     age,
     mbf_type,
-    AVG(retention) as avg_retention,
-    STDDEV_SAMP(retention) as std_retention
+    AVG(retention),
+    STDDEV_SAMP(retention),
+    COUNT(user_id)
 FROM 
     giovanni.retention
 JOIN
@@ -60,8 +62,9 @@ UNION SELECT
     "feedback+response",
     age,
     mbf_type,
-    AVG(retention) as avg_retention,
-    STDDEV_SAMP(retention) as std_retention
+    AVG(retention),
+    STDDEV_SAMP(retention),
+    COUNT(user_id)
 FROM 
     giovanni.retention
 JOIN
@@ -91,8 +94,9 @@ UNION SELECT
     "feedback+helpful",
     age,
     mbf_type,
-    AVG(retention) as avg_retention,
-    STDDEV_SAMP(retention) as std_retention
+    AVG(retention),
+    STDDEV_SAMP(retention),
+    COUNT(user_id)
 FROM 
     giovanni.retention
 JOIN
