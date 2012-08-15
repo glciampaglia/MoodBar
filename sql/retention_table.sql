@@ -3,21 +3,7 @@
     first edit click
 */
 
--- uncomment only one block of the following
-
--- historical data
-SET @min_registration='20111214'; -- phase 3 of MoodBar deployed
-SET @max_registration='20120523'; -- temporary UI enhancements deployed
-
-/*
--- treatment
-SET @min_registration='20120523';
-SET @max_registration='20120614';
-
--- control group
-SET @min_registration='20120614';
-SET @max_registration='20120629';
-*/
+SOURCE dates.sql
 
 SET @db='giovanni'; -- change it to whatever you need
 
@@ -40,12 +26,19 @@ LEFT JOIN
     rfaulk.globaluser
 ON
     user_name = gu_name
+LEFT JOIN
+    giovanni.bot_ext b
+ON 
+    ept_user = b.user_id
 WHERE
+-- remove bots
+    b.user_id IS NULL
+AND
 -- only users that registered locally on enwiki within the eligibility window 
-    u.user_registration >= @min_registration
-    AND
-    u.user_registration < @max_registration
-    AND
+    u.user_registration >= @min_historical
+AND
+    u.user_registration < @max_control
+AND
     u.user_registration <= IFNULL(gu_registration, user_registration)
 GROUP BY
     ept.ept_user";

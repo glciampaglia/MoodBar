@@ -1,35 +1,28 @@
-/*
-    estimates the proportion of users using MoodBar for the first time. This can
-    be used as a crude upper bound to the effect size of editor retention rates
-    (when proportions are compared)
-*/
 SELECT 
-    SUM(b.num_first_feedback)/SUM(c.num_edit_click) * 100 AS perc_first_mooders 
-FROM (
-    SELECT 
-        date_first AS date, 
-        COUNT(date_first) AS num_first_feedback 
-    FROM (
-        SELECT 
-            DATE(MIN(mbf_timestamp)) AS date_first 
-        FROM 
-            moodbar_feedback 
-        GROUP BY 
-            mbf_user_id
-    ) a 
-    GROUP BY 
-        date
-    ) b 
-JOIN (
-    SELECT 
-        DATE(ept_timestamp) AS date,
-        COUNT(DATE(ept_timestamp)) AS num_edit_click 
-    FROM 
-        edit_page_tracking 
-    GROUP BY 
-        DATE(ept_timestamp)
-    ) c 
+    DATE(window_begins) AS `window begins`, 
+    DATE(window_ends) AS `window ends`, 
+    DATEDIFF(window_ends, window_begins) AS days, 
+    uw_group AS `group`,
+    treatment_name AS `treatment`, 
+    COUNT(ut_user_id) AS `sample size`, 
+    COUNT(ut_user_id)/DATEDIFF(window_ends, window_begins) AS `adoption rate` 
+FROM 
+    giovanni.user_treatment 
+JOIN 
+    giovanni.user_window 
 ON 
-    c.date = b.date 
-WHERE 
-    b.date > '2011-11-01';
+    ut_user_id = uw_user_id
+JOIN 
+    giovanni.treatments 
+ON 
+    treatment_id = ut_treatment 
+JOIN 
+    giovanni.windows 
+ON 
+    window_name = uw_group 
+GROUP BY 
+    uw_group, 
+    treatment_name 
+ORDER BY 
+    window_id
+;

@@ -1,14 +1,4 @@
-/* historical data */
-SET @min_historical='20111214'; -- phase 3 of MoodBar deployed
-SET @max_historical='20120523'; -- temporary UI enhancements deployed
-
-/* treatment */
-SET @min_treatment='20120523';
-SET @max_treatment='20120614';
-
-/* control group */
-SET @min_control='20120614';
-SET @max_control='20120629';
+SOURCE dates.sql
 
 CREATE TEMPORARY TABLE IF NOT EXISTS
     giovanni.mark_as_helpful 
@@ -54,10 +44,10 @@ CREATE TABLE giovanni.user_treatment (
 ) SELECT 
     u.user_id AS ut_user_id,
     MAX(CASE
-        WHEN mah_id IS NOT NULL THEN 3
-        WHEN mbfr_id IS NOT NULL THEN 2
-        WHEN mbf_id IS NOT NULL THEN 1
-        ELSE 0
+        WHEN mah_id IS NOT NULL THEN 4
+        WHEN mbfr_id IS NOT NULL THEN 3
+        WHEN mbf_id IS NOT NULL THEN 2
+        ELSE 1
     END) AS ut_treatment
 FROM 
     edit_page_tracking 

@@ -2,8 +2,8 @@
     Create a table with editcount at 1, 2, 5, 10, and 30 days since first edit click
 */
 
-SET @min_registration='20111214'; -- phase 3 of MoodBar deployed
-SET @max_registration='20120522'; -- temporary UI enhancements deployed
+SOURCE dates.sql
+
 SET @db='giovanni'; -- change it to whatever you need
 
 SET @_create="CREATE TEMPORARY TABLE IF NOT EXISTS ";
