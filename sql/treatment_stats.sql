@@ -5,7 +5,7 @@ SELECT
     uw_group AS `group`,
     treatment_name AS `treatment`, 
     COUNT(ut_user_id) AS `sample size`, 
-    COUNT(ut_user_id)/DATEDIFF(window_ends, window_begins) AS `adoption rate` 
+    COUNT(ut_user_id)/DATEDIFF(window_ends, window_begins) AS `daily rate` 
 FROM 
     giovanni.user_treatment 
 JOIN 
@@ -24,5 +24,6 @@ GROUP BY
     uw_group, 
     treatment_name 
 ORDER BY 
-    window_id
+    window_id,
+    treatment_id
 ;
