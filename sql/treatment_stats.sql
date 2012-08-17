@@ -1,3 +1,5 @@
+/* computes adoption statistics for all group/treatment combinations */
+
 SELECT 
     DATE(window_begins) AS `window begins`, 
     DATE(window_ends) AS `window ends`, 

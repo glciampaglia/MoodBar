@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS giovanni.treatments;
 
 CREATE TABLE giovanni.treatments (
     treatment_id SMALLINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    treatment_name CHAR(19) NOT NULL
+    treatment_name VARCHAR(19) NOT NULL
 );
 
 INSERT INTO giovanni.treatments 

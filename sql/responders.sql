@@ -1,3 +1,6 @@
+/* retrieves a list of id/name of users who belong to the response team of
+ * MoodBar and/or the Teahouse
+ */
 SELECT 
     u.user_id, 
     u.user_name, 

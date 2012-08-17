@@ -23,6 +23,10 @@ LEFT JOIN
 ON 
     ept.ept_user = r.rev_user
 LEFT JOIN
+    page p
+ON
+    r.rev_page = p.page_id
+LEFT JOIN
     rfaulk.globaluser
 ON
     user_name = gu_name
@@ -40,6 +44,9 @@ AND
     u.user_registration < @max_control
 AND
     u.user_registration <= IFNULL(gu_registration, user_registration)
+-- only edits to articles count for determining the retention value
+AND
+    p.page_namespace = 0
 GROUP BY
     ept.ept_user";
 
