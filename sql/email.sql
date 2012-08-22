@@ -1,20 +1,22 @@
 SELECT
     "all users" AS category,
-    -- percentage of accounts with an authenticated email. Note that COUNT(expr)
-    -- returns the count of non-NULL values of expr.
-    COUNT(user_email_authenticated) / COUNT(user_id) AS email_ratio,
+    /* percentage of accounts with an authenticated email. Note that COUNT(expr)
+     * returns the count of non-NULL values of expr.
+     */
+    COUNT(user_email_authenticated) / COUNT(user_id) AS `% auth emails`,
 
-    -- average lag (in seconds) between account registration and email
-    -- authentication 
-    AVG(UNIX_TIMESTAMP(user_email_authenticated) 
-      - UNIX_TIMESTAMP(user_registration)) AS avg_email_lag,
+    /* average lag (in seconds) between account registration and email
+     * authentication 
+     */
+    ROUND(AVG(UNIX_TIMESTAMP(user_email_authenticated) 
+      - UNIX_TIMESTAMP(user_registration))/86400., 2) AS `authentication lag`,
 
-    -- standard deviation of registration - authentication lag
-    STD(UNIX_TIMESTAMP(user_email_authenticated) 
-      - UNIX_TIMESTAMP(user_registration)) AS std_email_lag,
+    /* standard deviation of registration - authentication lag */
+    ROUND(STD(UNIX_TIMESTAMP(user_email_authenticated) 
+      - UNIX_TIMESTAMP(user_registration))/86400., 2) AS `auth lag std`,
 
-    -- sample size 
-    COUNT(user_id) AS num_accounts
+    /* sample size */
+    COUNT(user_id) AS `group size`
 FROM
     user
 LEFT JOIN
@@ -29,12 +31,12 @@ AND
 
 UNION SELECT
     "active users",
-    COUNT(user_email_authenticated) / COUNT(user_id) AS email_ratio,
-    AVG(UNIX_TIMESTAMP(user_email_authenticated) 
-      - UNIX_TIMESTAMP(user_registration)) AS avg_email_lag,
-    STD(UNIX_TIMESTAMP(user_email_authenticated) 
-      - UNIX_TIMESTAMP(user_registration)) AS std_email_lag,
-    COUNT(user_id) AS num_accounts
+    COUNT(user_email_authenticated) / COUNT(user_id),
+    ROUND(AVG(UNIX_TIMESTAMP(user_email_authenticated) 
+      - UNIX_TIMESTAMP(user_registration))/86400.,2),
+    ROUND(STD(UNIX_TIMESTAMP(user_email_authenticated) 
+      - UNIX_TIMESTAMP(user_registration))/86400.,2),
+    COUNT(user_id)
 FROM
     user
 JOIN
@@ -52,12 +54,12 @@ AND
 
 UNION SELECT
     "moodbar users",
-    COUNT(user_email_authenticated) / COUNT(user_id) AS email_ratio,
-    AVG(UNIX_TIMESTAMP(user_email_authenticated) 
-      - UNIX_TIMESTAMP(user_registration)) AS avg_email_lag,
-    STD(UNIX_TIMESTAMP(user_email_authenticated) 
-      - UNIX_TIMESTAMP(user_registration)) AS std_email_lag,
-    COUNT(user_id) AS num_accounts
+    COUNT(user_email_authenticated) / COUNT(user_id),
+    ROUND(AVG(UNIX_TIMESTAMP(user_email_authenticated) 
+      - UNIX_TIMESTAMP(user_registration))/86400.,2),
+    ROUND(STD(UNIX_TIMESTAMP(user_email_authenticated) 
+      - UNIX_TIMESTAMP(user_registration))/86400.,2),
+    COUNT(user_id)
 FROM
     user
 JOIN
@@ -76,4 +78,3 @@ WHERE
     user_registration <= IFNULL(gu_registration, user_registration)
 AND
     user_registration > '20111214';
-

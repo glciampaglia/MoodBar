@@ -31,9 +31,9 @@ ON
     user_name = gu_name
 WHERE
 -- only users that registered locally on enwiki within the eligibility window 
-    u.user_registration >= @min_registration
+    u.user_registration >= @min_historical
     AND
-    u.user_registration < @max_registration
+    u.user_registration < @max_historical
     AND
     u.user_registration <= IFNULL(gu_registration, user_registration)
 GROUP BY
