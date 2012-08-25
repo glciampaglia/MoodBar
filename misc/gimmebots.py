@@ -8,33 +8,38 @@ import json
 import re
 from codecs import utf_8_decode, utf_8_encode
 from itertools import imap, repeat
-import oursql
+
+try:
+    from MySQLdb import connect
+except ImportError:
+    from oursql import connect
 
 h = "http://en.wikipedia.org"
+userdb = "giovanni"
 
 q_temp_table = """
-create temporary table giovanni.bot_temp ( user_name varbinary(255) );
-"""
+create temporary table %s.bot_temp ( user_name varbinary(255) );
+""" % userdb
 
-q_temp_insert = """ insert giovanni.bot_temp set user_name = ? """
+q_temp_insert = """ insert %s.bot_temp set user_name = ? """ % userdb
 
-q_temp_delete = """ delete from giovanni.bot_temp where user_name = ? """
+q_temp_delete = """ delete from %s.bot_temp where user_name = ? """ % userdb
 
 # finds user names in bot list that do not correspond to any user_name in user
-q_test = """select user_name from user right join giovanni.bot_temp using
-    (user_name) where user_id is null"""
+q_test = """select user_name from user right join %s.bot_temp using
+    (user_name) where user_id is null""" % userdb
 
 # finds original user_name of renamed accounts
 q_redirect = """ select user_name from page join redirect on page_id = rd_from
 join user on user_name = rd_title where page_namespace = 2 and page_title = ? """
 
-q_table_delete = """ drop table if exists giovanni.bot """
+q_table_delete = """ drop table if exists %s.bot """ % userdb
 
 q_table = """ 
-create table giovanni.bot ( user_id int not null, user_name varbinary(255),
+create table %(userdb)s.bot ( user_id int not null, user_name varbinary(255),
 constraint foreign key bot_user_id (user_id) references user (user_id)) select 
-distinct user_id, user_name from giovanni.bot_temp join user using (user_name)
-"""
+distinct user_id, user_name from %(userdb)s.bot_temp join user using (user_name)
+""" % { "userdb" : userdb }
 
 def split(seq, chunk_len):
     ''' split seq in chunks of chunk_len. Returns a list of chunks. '''
@@ -174,7 +179,7 @@ def create_table(conn, bots):
     unmatched = []
     for i in xrange(len(unmatched_candidates)):
         cand_row = unmatched_candidates.pop()
-        cu.execute('select user_name from giovanni.bot where user_name = ?',
+        cu.execute('select user_name from %s.bot where user_name = ?' % userdb,
                 cand_row)
         if cu.fetchone():
             pass
@@ -196,7 +201,7 @@ if __name__ == '__main__':
     print '{} names (incl. redirects) found from bots list'.format(len(bots))
 
     # the database session corresponds to the scope of this with statement
-    with closing(oursql.connect(read_default_file='~/.my.cnf')) as conn:
+    with closing(connect(read_default_file='~/.my.cnf')) as conn:
 
         # create bots table
         unmatched_bots = create_table(conn, bots)
