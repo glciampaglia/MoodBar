@@ -7,14 +7,13 @@
 # each day, modulo sockpuppets and double accounts, consists of independent
 # groups of people. 
 
-setwd("../..")
-
 library(ggplot2)
 
-RET <- read.table("data/retention_daily.csv", header=T, sep="\t")
+RET <- read.table("../../data/retention_daily.csv", header=T, sep="\t")
 RET$reg <- as.numeric(as.Date(RET$registration.date))
 RET$ret <- RET$still.active / RET$group.size
 RET$age <- as.factor(RET$account.age)
+
 
 # computes GCV for LOESS model x
 loessGCV <- function (x) {
