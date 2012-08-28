@@ -1,11 +1,10 @@
 /* average retention by account age/window, with accuracy figures */
 
 SELECT
-    age as day,
-    uw_group as `group`,
-    AVG(retention) as `retention`,
-    ROUND(STDDEV_SAMP(retention) / SQRT(COUNT(user_id)), 4) as `standard error`
-    COUNT(user_id) as `sample size`
+    age `account age`,
+    uw_group `group`,
+    SUM(retention) `still active`,
+    COUNT(user_id) `group size`
 FROM
     giovanni.user_window
 JOIN

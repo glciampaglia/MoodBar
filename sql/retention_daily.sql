@@ -1,9 +1,9 @@
 SELECT
-    age as `account age`,
-    uw_group as `group`,
-    DATE(uw_registration) as `date`,
-    AVG(retention) as `retention`,
-    ROUND(STDDEV_SAMP(retention) / SQRT(COUNT(user_id)), 4) as `standard error`
+    age `account age`,
+    uw_group `group`,
+    DATE(uw_registration) `registration date`,
+    SUM(retention) `still active`,
+    COUNT(user_id) `group size`
 FROM
     giovanni.user_window
 JOIN

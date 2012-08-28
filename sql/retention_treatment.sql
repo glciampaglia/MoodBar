@@ -3,12 +3,11 @@
  */
 
 SELECT
-    age as day,
-    uw_group as `group`,
-    treatment_name as `treatment`,
-    AVG(retention) as `retention`,
-    STDDEV_SAMP(retention) as `retention std`,
-    COUNT(user_id) as `sample size`
+    age `account age`,
+    uw_group `group`,
+    treatment_name `treatment`,
+    SUM(retention) `still active`,
+    COUNT(user_id) `group size`
 FROM
     giovanni.user_window
 JOIN
@@ -24,7 +23,7 @@ JOIN
 ON
     ut_treatment = treatment_id
 GROUP BY
-    day,
+    age,
     uw_group,
     treatment_name
 WITH ROLLUP
