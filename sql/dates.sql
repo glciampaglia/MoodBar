@@ -4,7 +4,7 @@ SET @max_historical='20120523'; -- temporary UI enhancements deployed
 
 /* treatment */
 SET @min_treatment='20120523';
-SET @max_treatment='20120613';
+SET @max_treatment='20120614';
 
 /* Note: users registered on 2012-06-14 are excluded from the analysis because
  * deployment takes some time and thus it is not possible to establish

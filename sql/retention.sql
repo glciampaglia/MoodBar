@@ -16,6 +16,6 @@ JOIN
 ON
     uw_user_id = user_id
 GROUP BY
-    day,
+    age,
     uw_group
 ;
