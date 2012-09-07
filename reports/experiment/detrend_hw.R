@@ -50,6 +50,7 @@ for (age in levels(RET$age)) {
      acf(hw.resid[[age]], main=sprintf("%s day(s)", age))
 }
 dev.copy2pdf(file="plots/acf_hw.resid.pdf")
+savePlot(file="plots/acf_hw.resid.png", type="png")
 dev.off()
 
 # construct detrended retention from the residuals of the HoltWinters filter (or
@@ -101,3 +102,4 @@ ylab("retention probability") + scale_y_continuous(limits=c(0,0.5))
 p1 <- p1 + geom_line(aes(x=RET.det$reg, y=RET.det$ret.hat, group=age), colour="black")
 print(p1)
 ggsave(p1, filename="plots/hw_retention_prob.pdf")
+savePlot(file="plots/hw_retention_prob.png", type="png")

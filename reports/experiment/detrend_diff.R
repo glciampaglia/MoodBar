@@ -17,6 +17,7 @@ facet_wrap(~ age, ncol=2)  + geom_smooth(aes(group=age), method="lm",
 ylab("still active") 
 print(scatter.plot) 
 dev.copy2pdf(file="plots/group.size-still.active.pdf")
+savePlot(file="plots/group.size-still.active.png", type="png")
 dev.off()
 
 # sort dates chronologically
@@ -46,6 +47,7 @@ for (a in ages) {
     acf(still.active[[a]], main = sprintf("still_active(%s)", a))
 }
 dev.copy2pdf(file="plots/acf_still_active.pdf")
+savePlot(file="plots/acf_still_active.png", type="png")
 dev.off()
 
 #
@@ -61,6 +63,7 @@ for (a in ages) {
     acf(still.active.diff[[a]], main = sprintf("still_active(%s)", a))
 }
 dev.copy2pdf(file="plots/acf_still_active_diff.pdf")
+savePlot(file="plots/acf_still_active_diff.png", type="png")
 dev.off()
 
 #
@@ -77,6 +80,7 @@ for (a in ages) {
     acf(group.size[[a]], main = sprintf("group_size(%s)", a))
 }
 dev.copy2pdf(file="plots/acf_group_size.pdf")
+savePlot(file="plots/acf_group_size.png", type="png")
 dev.off()
 
 #
@@ -92,6 +96,7 @@ for (a in ages) {
     acf(group.size.diff[[a]], main = sprintf("group_size(%s)", a))
 }
 dev.copy2pdf(file="plots/acf_group_size_diff.pdf")
+savePlot(file="plots/acf_group_size_diff.png", type="png")
 dev.off()
 
 #
@@ -107,6 +112,7 @@ for (a in ages) {
     acf(retention[[a]], main = sprintf("retention(%s)", a))
 }
 dev.copy2pdf(file="plots/acf_retention.pdf")
+savePlot(file="plots/acf_retention.png", type="png")
 dev.off()
 
 #
@@ -122,6 +128,7 @@ for (a in ages) {
     acf(retention.diff[[a]], main = sprintf("retention(%s)", a))
 }
 dev.copy2pdf(file="plots/acf_retention_diff.pdf")
+savePlot(file="plots/acf_retention_diff.png", type="png")
 dev.off()
 
 # create data frame (with one element less than the original D.F.)
@@ -141,6 +148,7 @@ geom_area(alpha = .5) + facet_wrap(~ age, ncol=1) + xlab("registration date") +
 ylab("retention (diff from baseline)")
 print(retention.plot)
 dev.copy2pdf(file="plots/retention_deseasonalized.pdf")
+savePlot(file="plots/retention_deseasonalized.png", type="png")
 dev.off()
 
 group.ret <- with(RET.diff, tapply(ret, list(group, age), mean, simplify=FALSE))

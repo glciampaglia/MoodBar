@@ -15,3 +15,5 @@ d.1 <- decompose(ts(as.numeric(RET$group.size.1), frequency=7))
 # plot and save to file
 plot(d.1)
 dev.copy2pdf(file="plots/group.size.1_decompose.pdf")
+savePlot(file="plots/group.size.1_decompose.png", type="png")
+dev.off()
