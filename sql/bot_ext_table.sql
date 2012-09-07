@@ -19,5 +19,5 @@ FROM
 ORDER BY 
     user_id;
 
-
+-- Manually add any other bot that is not catched by gimmebot.py
 INSERT INTO giovanni.bot_ext VALUE (16529866, 'BlevintronBot');

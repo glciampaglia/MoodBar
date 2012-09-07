@@ -1,8 +1,7 @@
-/* average retention by account age/window, with accuracy figures */
-
 SELECT
     age `account age`,
     uw_group `group`,
+    DATE(uw_registration) `registration date`,
     SUM(retention) `still active`,
     COUNT(user_id) `group size`
 FROM
@@ -17,5 +16,6 @@ ON
     uw_user_id = user_id
 GROUP BY
     age,
-    uw_group
+    uw_group,
+    DATE(uw_registration)
 ;
