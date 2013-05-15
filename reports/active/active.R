@@ -1,3 +1,13 @@
+# TODO 
+# 1. t-tests 
+# 2. power of test
+# 3. plot of significance + power vs age
+# 4. corrected p-value of all comparisons
+# 5. add confidence intervals to plot of difference over age
+
+## @knitr read-data
+
+require(binom)
 require(ggplot2)
 
 # read data, remove historical group
@@ -6,6 +16,8 @@ active <- read.table("../../data/active.tsv", stringsAsFactors=T, sep="\t",
 active <- within(subset(active, group != "historical"), {
                  group <- droplevels(group, "historical")
                      })
+
+## @knitr prep-data
 
 # add size variable to data frame
 active$size <- 0
@@ -36,6 +48,8 @@ for (g in levels(active$group)) {
 # estimate proportion of retained
 active$ph <- active$active / active$size
 
+## @knitr plot-diff
+
 # plot difference 
 ph <- split(active$ph, active$group)
 N <- min(length(ph[["control"]]), length(ph[["treatment"]]))
@@ -45,6 +59,14 @@ plot(ph[["treatment"]][1:N] - ph[["control"]][1:N], xlab="Age",
 abline(mdph, 0, col="red")
 savePlot("diff.png")
 
+## @knitr plot-all
+
+# Agresti-Coull confindence intervals
+c <- binom.confint(active$active, active$size, methods="ac")
+active$lower <- c$lower
+active$upper <- c$upper
+
 # plot the data
 ggplot(active, aes(age, active / size, colour=group)) + geom_point() +
-scale_y_continuous(limits=c(0,0.1)) + scale_y_log10() 
+geom_errorbar(aes(ymax=upper, ymin=lower)) +
+scale_y_log10() #+ scale_x_log10()
