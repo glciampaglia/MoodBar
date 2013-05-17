@@ -3,27 +3,30 @@
 % `r date()`
 
 <!-- set up R -->
-`ro warning=FALSE, dev="pdf", fig.cap="", cache=FALSE or`
+```{r warning=FALSE, dev="pdf", fig.cap="", cache=FALSE}
+```
 
 <!-- read script -->
 ```{r reading, echo=FALSE}
 read_chunk("active.R")
 ```
 
-```{r}
+```{r, echo=FALSE}
 <<read-data>>
 ```
 
-```{r}
+```{r, echo=FALSE}
 <<prep-data>>
 ```
 
-```{r plot-fig1, result="asis", dev="pdf"}
+```{r plot-fig1, result="asis", dev="pdf", echo=FALSE}
 <<plot-diff>>
 ```
 
-```{r plot-fig2, result="asis", dev="pdf"}
+```{r plot-fig2, result="asis", dev="pdf", echo=FALSE}
 <<plot-all>>
 ```
 
-" vim:ft=markdown
+<!--
+" vim:ft=markdown 
+-->
