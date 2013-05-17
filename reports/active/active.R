@@ -1,9 +1,10 @@
 # TODO 
-# 1. t-tests 
-# 2. power of test
-# 3. plot of significance + power vs age
-# 4. corrected p-value of all comparisons
-# 5. add confidence intervals to plot of difference over age
+# 1. proportions test (prop.test)
+# 2. power of test (use pwr.2p2n.test)
+# 3. plot of significance + power vs age 
+# 4. corrected p-value of all comparisons (use p.adjust)
+# 5. add confidence intervals to plot of difference over age (pool the
+# variances)
 
 ## @knitr read-data
 
