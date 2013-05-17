@@ -46,18 +46,20 @@ for (g in levels(active$group)) {
 }
 
 # estimate proportion of retained
-active$ph <- active$active / active$size
+active$p.est <- active$active / active$size
 
 ## @knitr plot-diff
 
-# plot difference 
-ph <- split(active$ph, active$group)
-N <- min(length(ph[["control"]]), length(ph[["treatment"]]))
-mdph <- mean(ph[["treatment"]][1:N] - ph[["control"]][1:N])
-plot(ph[["treatment"]][1:N] - ph[["control"]][1:N], xlab="Age",
-     ylab=expression(hat(p)[treatment] - hat(p)[control]))
-abline(mdph, 0, col="red")
-savePlot("diff.png")
+# create retention data frame
+p.est <- split(active$p.est, active$group)
+N <- min(sapply(p.est, length))
+retention <- data.frame(age = seq(1,N), ret.control = p.est[['control']][1:N],
+                        ret.treatment = p.est[['treatment']][1:N])
+m.ret.diff = with(retention, mean(ret.treatment - ret.control))
+
+ggplot(retention, aes(age, ret.treatment - ret.control)) + geom_point() + 
+geom_abline(intercept=m.ret.diff, slope=0, colour='red') +
+xlab("Age") + ylab(expression(hat(p)[treatment] - hat(p)[control])) + theme_bw()
 
 ## @knitr plot-all
 
@@ -66,7 +68,8 @@ c <- binom.confint(active$active, active$size, methods="ac")
 active$lower <- c$lower
 active$upper <- c$upper
 
-# plot the data
+# plot the raw data
 ggplot(active, aes(age, active / size, colour=group)) + geom_point() +
 geom_errorbar(aes(ymax=upper, ymin=lower)) +
 scale_y_log10() #+ scale_x_log10()
+
